@@ -44,55 +44,47 @@ dta_OF_combined_select<- dta_combined_OF[,c(1:5, 680:715)]
 colnames(dta_OF_combined_select)
 
 # create variables
-dta_OF_combined_select$ssid<- substr(dta_OF_combined_select$filename, 1,3)
+
+dta_OF_combined_select$filename
+dta_OF_combined_select
+
+
+dta_OF_combined_select$ssid <- gsub("^https?://[^/]+/([^/]+)/.*", "\\1", dta_OF_combined_select$filename)
+
+
+# substr(dta_OF_combined_select$filename, 2,17)
 
 unique(dta_OF_combined_select$ssid)
+# subvset empty rows?
 
-dta_OF_combined_select<- dta_OF_combined_select%>%
-  subset(ssid != "IAP")
-
-dta_OF_combined_select$screencontent<- if_else(grepl("IAPSfix",dta_OF_combined_select$filename), "fixation", "stimuli")
-
-unique(dta_OF_combined_select$screencontent)
-
+# pratice
 dta_OF_combined_select$practice_stim <- if_else(grepl("Example",dta_OF_combined_select$filename), "practice", "trial")
 
-unique(dta_OF_combined_select$practice_stim)
-unique(dta_OF_combined_select$filename)
 
 dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename,5,200)
 dta_OF_combined_select$filename2<- str_remove(dta_OF_combined_select$filename2, "IAPS|fix")
+
+
 unique(dta_OF_combined_select$filename2)
 
 dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename2,6,200)
 dta_OF_combined_select$filename2
-dta_OF_combined_select$stimIAPS <- substr(dta_OF_combined_select$filename2,1,8)
 
+# imagefile
+dta_OF_combined_select$stimIAPS <- substr(dta_OF_combined_select$filename2,1,8)
 dta_OF_combined_select$filename2
 
-
-
-# [1] "world"
-# dta_OF_combined_select$trialIAPS.thisTrialN<- str_remove(sub(".*__", "", dta_OF_combined_select$filename2), ".csv")
-# dta_OF_combined_select$trialIAPS.thisTrialN
-# unique(dta_OF_combined_select$trialIAPS.thisTrialN)
-# doesn't work that we;;
-
-# dta_OF_combined_select$trialIAPS.thisTrialN<- NULL
-dta_OF_combined_select_stimuli<- subset(dta_OF_combined_select, screencontent == "stimuli")
-
-colnames(dta_OF_combined_select_stimuli)
-
-
-dta_OF_combined_select_stimuli_agg<- dta_OF_combined_select_stimuli%>%
+# summarise 
+dta_OF_combined_select_agg <- dta_OF_combined_select%>%
   group_by(ssid, practice_stim,stimIAPS)%>%
   summarise_if(is.numeric, mean, na.rm = T)
 
-colnames(as.data.frame(dta_OF_combined_select_stimuli_agg))
-length(colnames(dta_OF_combined_select_stimuli_agg))
+colnames(as.data.frame(dta_OF_combined_select_agg))
+length(colnames(dta_OF_combined_select_agg))
 
 tmp_AUnames
 
+# new names with AU descriptions
 tmp_AUnames<- c("ssid" ,         
                 "practice_stim", 
                 "stimIAPS"   ,   
@@ -138,9 +130,10 @@ tmp_AUnames<- c("ssid" ,
 "AU45_c_Blink")
 tmp_AUnames
 
-dta_OF_combined_select_stimuli_agg<- dta_OF_combined_select_stimuli_agg2
-dta_OF_combined_select_stimuli_agg2<- dta_OF_combined_select_stimuli_agg
-colnames(dta_OF_combined_select_stimuli_agg)<- tmp_AUnames
+# dta_OF_combined_select_stimuli_agg2<- dta_OF_combined_select_stimuli_agg
+colnames(dta_OF_combined_select_agg)<- tmp_AUnames
 
 
 ```
+
+
