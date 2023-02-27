@@ -1,0 +1,146 @@
+---
+title: "Preprocess_OF"
+author: "Helio"
+date: "2023-02-27"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+# Set working directory to the folder containing subfolders with CSV files
+setwd("~/Library/CloudStorage/GoogleDrive-helioclemente.c@gmail.com/My Drive/University of Oxford/Students/StephaniesProject/Data/OpenFace1")
+
+# Get a list of all CSV files within subfolders using list.files() and recursive = TRUE
+tmp_file_list <- list.files(pattern = "\\.csv$", recursive = TRUE, full.names = TRUE)
+
+
+# Initialize an empty data frame to hold combined data
+dta_combined_OF <- data.frame()
+
+# Loop through each CSV file in the list and read it into a data frame using read.csv()
+
+# read the CSV files into a list of data frames, and store the filename as a new column in each data frame
+tmp_data_list <- lapply(tmp_file_list, function(file) {
+  data <- read.csv(file)
+  data$filename <- file
+  data
+})
+
+# combine the data frames into a single data frame
+dta_combined_OF <- do.call(rbind, tmp_data_list)
+# View the resulting combined data frame
+dta_combined_OF
+
+unique(dta_combined_OF$filename)
+
+write_rds(dta_combined_OF, "dta_combined_OF,rds")
+
+colnames(dta_combined_OF)
+
+dta_OF_combined_select<- dta_combined_OF[,c(1:5, 680:715)]
+
+colnames(dta_OF_combined_select)
+
+# create variables
+dta_OF_combined_select$ssid<- substr(dta_OF_combined_select$filename, 1,3)
+
+unique(dta_OF_combined_select$ssid)
+
+dta_OF_combined_select<- dta_OF_combined_select%>%
+  subset(ssid != "IAP")
+
+dta_OF_combined_select$screencontent<- if_else(grepl("IAPSfix",dta_OF_combined_select$filename), "fixation", "stimuli")
+
+unique(dta_OF_combined_select$screencontent)
+
+dta_OF_combined_select$practice_stim <- if_else(grepl("Example",dta_OF_combined_select$filename), "practice", "trial")
+
+unique(dta_OF_combined_select$practice_stim)
+unique(dta_OF_combined_select$filename)
+
+dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename,5,200)
+dta_OF_combined_select$filename2<- str_remove(dta_OF_combined_select$filename2, "IAPS|fix")
+unique(dta_OF_combined_select$filename2)
+
+dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename2,6,200)
+dta_OF_combined_select$filename2
+dta_OF_combined_select$stimIAPS <- substr(dta_OF_combined_select$filename2,1,8)
+
+dta_OF_combined_select$filename2
+
+
+
+# [1] "world"
+# dta_OF_combined_select$trialIAPS.thisTrialN<- str_remove(sub(".*__", "", dta_OF_combined_select$filename2), ".csv")
+# dta_OF_combined_select$trialIAPS.thisTrialN
+# unique(dta_OF_combined_select$trialIAPS.thisTrialN)
+# doesn't work that we;;
+
+# dta_OF_combined_select$trialIAPS.thisTrialN<- NULL
+dta_OF_combined_select_stimuli<- subset(dta_OF_combined_select, screencontent == "stimuli")
+
+colnames(dta_OF_combined_select_stimuli)
+
+
+dta_OF_combined_select_stimuli_agg<- dta_OF_combined_select_stimuli%>%
+  group_by(ssid, practice_stim,stimIAPS)%>%
+  summarise_if(is.numeric, mean, na.rm = T)
+
+colnames(as.data.frame(dta_OF_combined_select_stimuli_agg))
+length(colnames(dta_OF_combined_select_stimuli_agg))
+
+tmp_AUnames
+
+tmp_AUnames<- c("ssid" ,         
+                "practice_stim", 
+                "stimIAPS"   ,   
+                "frame"    ,     
+                "face_id"      , 
+                "timestamp"   ,  
+                "confidence" ,   
+                "success",
+ "AU01_r_Inner_brow_raiser",   
+ "AU02_r_Outer_brow_raiser",   
+ "AU04_r_Brow_lowerer",       
+"AU05_r_Upper_lid_raiser",    
+"AU06_r_Cheek_raiser",        
+"AU07_r_Lid_tightener",       
+"AU09_r_Nose_wrinkler",      
+ "AU10_r_Upper_lip_raiser",    
+"AU12_r_Lip_corner_puller",   
+"AU14_r_Dimpler",             
+"AU15_r_Lip_corner_depressor",
+ "AU17_r_Chin_raiser",         
+"AU20_r_Lip_stretcher",       
+"AU23_r_Lip_tightener",      
+"AU25_r_Lips_part",          
+"AU26_r_Jaw_drop",            
+"AU45_r_Blink",               
+"AU01_c_Inner_brow_raiser",   
+"AU02_c_Outer_brow_raiser",  
+"AU04_c_Brow_lowerer",        
+"AU05_c_Upper_lid_raiser",    
+"AU06_c_Cheek_raiser",        
+"AU07_c_Lid_tightener",      
+"AU09_c_Nose_wrinkler",      
+"AU10_c_Upper_lip_raiser",    
+"AU12_c_Lip_corner_puller",   
+"AU14_c_Dimpler",            
+ "AU15_c_Lip_corner_depressor",
+"AU17_c_Chin_raiser",        
+"AU20_c_Lip_stretcher",       
+"AU23_c_Lip_tightener",      
+"AU25_c_Lips_part",          
+"AU26_c_Jaw_drop",    
+"AU28_c_Lip_suck",    
+"AU45_c_Blink")
+tmp_AUnames
+
+dta_OF_combined_select_stimuli_agg<- dta_OF_combined_select_stimuli_agg2
+dta_OF_combined_select_stimuli_agg2<- dta_OF_combined_select_stimuli_agg
+colnames(dta_OF_combined_select_stimuli_agg)<- tmp_AUnames
+
+
+```
