@@ -8,8 +8,12 @@ output: html_document
 
 ```{r setup, include=FALSE}
 
-library(tidyverse)
+install.packages("tidyverse")
+
+require(tidyverse)
 # Set working directory to the folder containing subfolders with CSV files
+setwd("~/Library/CloudStorage/GoogleDrive-helioclemente.c@gmail.com/My Drive/University of Oxford/Students/StephaniesProject/Data/OpenFace1")
+
 setwd("~/Library/CloudStorage/GoogleDrive-helioclemente.c@gmail.com/My Drive/University of Oxford/Students/StephaniesProject/Data/OpenFace1")
 
 # Get a list of all CSV files within subfolders using list.files() and recursive = TRUE
@@ -29,20 +33,25 @@ tmp_data_list <- lapply(tmp_file_list, function(file) {
 })
 
 # combine the data frames into a single data frame
+rm(tmp_data_list)
 dta_combined_OF <- do.call(rbind, tmp_data_list)
+
+saveRDS(dta_combined_OF, "dta_combined_OF_newmac_compressed.Rds")
 # View the resulting combined data frame
 dta_combined_OF
 
 unique(dta_combined_OF$filename)
 
-write_rds(dta_combined_OF, "dta_combined_OF,rds")
+# write_rds(dta_combined_OF, "dta_combined_OF,rds")
 
-colnames(dta_combined_OF)
+length(colnames(dta_combined_OF))
+
+rm(dta_combined_OF)
 
 dta_OF_combined_select<- dta_combined_OF[,c(1:5, 680:715)]
 
 colnames(dta_OF_combined_select)
-
+rm(tmp_file_list)
 # create variables
 
 dta_OF_combined_select$filename
