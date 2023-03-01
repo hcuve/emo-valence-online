@@ -58,21 +58,15 @@ dta_OF_combined_select$filename
 dta_OF_combined_select
 
 
-dta_OF_combined_select$ssid <- gsub("^https?://[^/]+/([^/]+)/.*", "\\1", dta_OF_combined_select$filename)
+dta_OF_combined_select$ssid <- str_remove_all(substr(dta_OF_combined_select$filename, 2,16),"/")
 
-
-# substr(dta_OF_combined_select$filename, 2,17)
 
 unique(dta_OF_combined_select$ssid)
-# subvset empty rows?
+
 
 # pratice
 library(tidyverse)
-dta_OF_combined_select$practice_stim <- if_else(grepl("Example",dta_OF_combined_select$filename), "practice", "trial")
-unique(dta_OF_combined_select$filename)
 
-
-unique(dta_OF_combined_select$practice_stim)
 
 # the first 8 fumbers after the second slash are task code and version
 # df$substring <- str_extract(df$url, "(?<=//[^/]+/[^/]+/).{5}")
@@ -83,19 +77,12 @@ dta_OF_combined_select$task_code_v <- substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", d
 unique(dta_OF_combined_select$task_code_v )
 
 # participant provate id
-dta_OF_combined_select$participant_private_id<- unique(substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 10,10+7))
+unique(substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 10,10+7))
+dta_OF_combined_select$participant_private_id<- substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 10,10+6)
+
+length(unique(dta_OF_combined_select$participant_private_id))
 
 
-# dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename,5,200)
-# dta_OF_combined_select$filename2<- str_remove(dta_OF_combined_select$filename2, "IAPS|fix")
-
-
-unique(dta_OF_combined_select$filename)
-
-# dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename2,6,200)
-# dta_OF_combined_select$filename2
-
-# imagefile
 
 library(stringr)
 
@@ -115,26 +102,36 @@ dta_OF_combined_select$filename_digits_bef_csv<- str_remove_all(sub(".*(-)", "\\
 dta_OF_combined_select$practice_trial<- if_else(dta_OF_combined_select$filename_digits_bef_csv == "1", "practice", "trial")
 dta_OF_combined_select$practice_stim<- NULL
 
-# participant provate ID?
-unique(dta_OF_combined_select$filename)
-dta_OF_combined_select$filename
 
-dta_OF_combined_select%>%
-  subset(filename_digits_bef_csv == "1")
+colnames(dta_OF_combined_select)
+
+
+
+```
+
+aggregate
+```{r}
+
+colnames(dta_OF_combined_select)
+
 # summarise 
+# require(tidyverse)
+
 dta_OF_combined_select_agg <- dta_OF_combined_select%>%
-  group_by(ssid, practice_stim,stimIAPS)%>%
+  group_by(ssid, practice_trial,stimIAPS,task_code_v,participant_private_id)%>%
   summarise_if(is.numeric, mean, na.rm = T)
 
 colnames(as.data.frame(dta_OF_combined_select_agg))
-length(colnames(dta_OF_combined_select_agg))
+
 
 tmp_AUnames
 
 # new names with AU descriptions
 tmp_AUnames<- c("ssid" ,         
-                "practice_stim", 
+                "practice_trial", 
                 "stimIAPS"   ,   
+                "task_code_v",
+                 "participant_private_id",
                 "frame"    ,     
                 "face_id"      , 
                 "timestamp"   ,  
@@ -179,6 +176,9 @@ tmp_AUnames
 
 # dta_OF_combined_select_stimuli_agg2<- dta_OF_combined_select_stimuli_agg
 colnames(dta_OF_combined_select_agg)<- tmp_AUnames
+
+dta_OF_combined_select_agg
+write_csv(dta_OF_combined_select_agg, "dta_OF_combined_select_agg.csv")
 
 
 ```
