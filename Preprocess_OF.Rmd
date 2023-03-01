@@ -67,22 +67,60 @@ unique(dta_OF_combined_select$ssid)
 # subvset empty rows?
 
 # pratice
+library(tidyverse)
 dta_OF_combined_select$practice_stim <- if_else(grepl("Example",dta_OF_combined_select$filename), "practice", "trial")
+unique(dta_OF_combined_select$filename)
 
 
-dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename,5,200)
-dta_OF_combined_select$filename2<- str_remove(dta_OF_combined_select$filename2, "IAPS|fix")
+unique(dta_OF_combined_select$practice_stim)
+
+# the first 8 fumbers after the second slash are task code and version
+# df$substring <- str_extract(df$url, "(?<=//[^/]+/[^/]+/).{5}")
+# return evrything after the second slash then keep the first 8 
 
 
-unique(dta_OF_combined_select$filename2)
+dta_OF_combined_select$task_code_v <- substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 1,8)
+unique(dta_OF_combined_select$task_code_v )
 
-dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename2,6,200)
-dta_OF_combined_select$filename2
+# participant provate id
+dta_OF_combined_select$participant_private_id<- unique(substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 10,10+7))
+
+
+# dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename,5,200)
+# dta_OF_combined_select$filename2<- str_remove(dta_OF_combined_select$filename2, "IAPS|fix")
+
+
+unique(dta_OF_combined_select$filename)
+
+# dta_OF_combined_select$filename2<- substr(dta_OF_combined_select$filename2,6,200)
+# dta_OF_combined_select$filename2
 
 # imagefile
-dta_OF_combined_select$stimIAPS <- substr(dta_OF_combined_select$filename2,1,8)
-dta_OF_combined_select$filename2
 
+library(stringr)
+
+
+dta_OF_combined_select$stimIAPS<- paste0(str_extract(dta_OF_combined_select$filename, "(.{4})(?=\\jpg)"),".jpg")
+
+# get number
+dta_OF_combined_select$stimIAPS<- paste0(str_extract(dta_OF_combined_select$filename, "(.{4})(?=\\jpg)"),".jpg")
+
+# after that pattern
+# df$suffix <- sub(".*(.jpg)", "\\1", df$filename)
+dta_OF_combined_select$filename_digits_aftjpg<- 
+  str_remove_all(substr(str_remove_all(sub(".*(jpg)", "\\1", dta_OF_combined_select$filename),"jpg-"),1,2),"-")
+
+dta_OF_combined_select$filename_digits_bef_csv<- str_remove_all(sub(".*(-)", "\\1", str_remove_all(sub(".*(jpg)", "\\1", dta_OF_combined_select$filename),"jpg-")), "-|.csv")
+
+dta_OF_combined_select$practice_trial<- if_else(dta_OF_combined_select$filename_digits_bef_csv == "1", "practice", "trial")
+dta_OF_combined_select$practice_stim<- NULL
+
+# participant provate ID?
+unique(dta_OF_combined_select$filename)
+dta_OF_combined_select$filename
+
+dta_OF_combined_select%>%
+  subset(filename_digits_bef_csv == "1")
 # summarise 
 dta_OF_combined_select_agg <- dta_OF_combined_select%>%
   group_by(ssid, practice_stim,stimIAPS)%>%
