@@ -80,6 +80,9 @@ unique(dta_OF_combined_select$task_code_v )
 unique(substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 10,10+7))
 dta_OF_combined_select$participant_private_id<- substr(sub("^([^/]+/[^/]+/)(.*)", "\\2", dta_OF_combined_select$filename), 10,10+6)
 
+
+dta_OF_combined_select$trial_number<- 
+
 length(unique(dta_OF_combined_select$participant_private_id))
 
 
@@ -92,10 +95,16 @@ dta_OF_combined_select$stimIAPS<- paste0(str_extract(dta_OF_combined_select$file
 # get number
 dta_OF_combined_select$stimIAPS<- paste0(str_extract(dta_OF_combined_select$filename, "(.{4})(?=\\jpg)"),".jpg")
 
+
+
 # after that pattern
 # df$suffix <- sub(".*(.jpg)", "\\1", df$filename)
 dta_OF_combined_select$filename_digits_aftjpg<- 
   str_remove_all(substr(str_remove_all(sub(".*(jpg)", "\\1", dta_OF_combined_select$filename),"jpg-"),1,2),"-")
+dta_OF_combined_select$trial_number<-
+dta_OF_combined_select$filename_digits_aftjpg
+
+ 
 
 dta_OF_combined_select$filename_digits_bef_csv<- str_remove_all(sub(".*(-)", "\\1", str_remove_all(sub(".*(jpg)", "\\1", dta_OF_combined_select$filename),"jpg-")), "-|.csv")
 
@@ -118,7 +127,7 @@ colnames(dta_OF_combined_select)
 # require(tidyverse)
 
 dta_OF_combined_select_agg <- dta_OF_combined_select%>%
-  group_by(ssid, practice_trial,stimIAPS,task_code_v,participant_private_id)%>%
+  group_by(ssid, practice_trial,stimIAPS,task_code_v,participant_private_id,trial_number)%>%
   summarise_if(is.numeric, mean, na.rm = T)
 
 colnames(as.data.frame(dta_OF_combined_select_agg))
@@ -132,6 +141,7 @@ tmp_AUnames<- c("ssid" ,
                 "stimIAPS"   ,   
                 "task_code_v",
                  "participant_private_id",
+                "trial_number",
                 "frame"    ,     
                 "face_id"      , 
                 "timestamp"   ,  
@@ -176,6 +186,7 @@ tmp_AUnames
 
 # dta_OF_combined_select_stimuli_agg2<- dta_OF_combined_select_stimuli_agg
 colnames(dta_OF_combined_select_agg)<- tmp_AUnames
+colnames(dta_OF_combined_select_agg)
 
 dta_OF_combined_select_agg
 write_csv(dta_OF_combined_select_agg, "dta_OF_combined_select_agg.csv")
